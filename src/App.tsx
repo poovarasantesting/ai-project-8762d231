@@ -1,22 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import LoginPage from "@/pages/LoginPage";
-import DashboardPage from "@/pages/DashboardPage";
+import { Toaster } from "@/components/ui/toaster";
+import { FacebookLogin } from "@/components/FacebookLogin";
 
-export default function App() {
-  const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-
+function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route 
-          path="/" 
-          element={isLoggedIn ? <Navigate to="/dashboard" /> : <LoginPage />} 
-        />
-        <Route 
-          path="/dashboard" 
-          element={<DashboardPage />} 
-        />
-      </Routes>
-    </BrowserRouter>
+    <>
+      <FacebookLogin />
+      <Toaster />
+    </>
   );
 }
+
+export default App;
