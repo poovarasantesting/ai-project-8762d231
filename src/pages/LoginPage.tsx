@@ -1,51 +1,29 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { LoginForm } from '@/components/LoginForm';
-import { useAuthStore } from '@/lib/auth';
-import { Button } from '@/components/ui/button';
-import { UserCog } from 'lucide-react';
+import React from 'react';
+import LoginForm from '@/components/LoginForm';
+import { useAuth } from '@/context/AuthContext';
+import { Navigate } from 'react-router-dom';
 
 export default function LoginPage() {
-  const { isAuthenticated } = useAuthStore();
-  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/dashboard');
-    }
-  }, [isAuthenticated, navigate]);
+  // Redirect if already logged in
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gray-50">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold">Welcome Back</h1>
-          <p className="text-gray-600 mt-2">Sign in to your account</p>
-        </div>
-        
-        <LoginForm />
-        
-        <div className="flex justify-center mt-6">
-          <Button 
-            variant="ghost" 
-            className="text-gray-500"
-            onClick={() => navigate('/admin-login')}
-          >
-            <UserCog className="mr-2 h-4 w-4" />
-            Go to Admin Login
-          </Button>
-        </div>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h1 className="text-center text-3xl font-extrabold text-gray-900 mb-6">
+          Login System
+        </h1>
+        <p className="text-center text-gray-600 mb-8">
+          Admin and User authentication demo with 3 test accounts
+        </p>
       </div>
-      
-      <div className="mt-8 text-center text-sm text-gray-500">
-        <div className="mt-4">
-          <h3 className="font-medium">Test User Credentials:</h3>
-          <ul className="mt-2">
-            <li>User 1: user1@example.com / password1</li>
-            <li>User 2: user2@example.com / password2</li>
-            <li>Admin: admin@example.com / adminpass</li>
-          </ul>
-        </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <LoginForm />
       </div>
     </div>
   );

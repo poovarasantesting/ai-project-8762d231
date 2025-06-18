@@ -1,61 +1,66 @@
-import { create } from 'zustand';
-import { AuthState, User } from './types';
+import { LoginCredentials, User } from "@/types/auth";
 
-// Test users with their credentials
-const testUsers: User[] = [
+// Mock database of users
+const users: (User & { password: string })[] = [
   {
-    id: '1',
-    email: 'user1@example.com',
-    password: 'password1',
-    name: 'Test User 1',
-    role: 'user',
+    id: "1",
+    email: "admin@example.com",
+    password: "admin123",
+    name: "Admin User",
+    role: "admin"
   },
   {
-    id: '2',
-    email: 'user2@example.com',
-    password: 'password2',
-    name: 'Test User 2',
-    role: 'user',
+    id: "2",
+    email: "user1@example.com",
+    password: "user123",
+    name: "Regular User 1",
+    role: "user"
   },
   {
-    id: '3',
-    email: 'admin@example.com',
-    password: 'adminpass',
-    name: 'Admin User',
-    role: 'admin',
-  },
+    id: "3",
+    email: "user2@example.com",
+    password: "user456",
+    name: "Regular User 2",
+    role: "user"
+  }
 ];
 
-export const useAuthStore = create<AuthState & {
-  login: (email: string, password: string) => Promise<boolean>;
-  logout: () => void;
-}>((set) => ({
-  user: null,
-  isAuthenticated: false,
-  error: null,
-  login: async (email: string, password: string) => {
-    // Find user by email
-    const user = testUsers.find(
-      (u) => u.email === email && u.password === password
-    );
+export const loginUser = async (credentials: LoginCredentials): Promise<User> => {
+  // Simulate API delay
+  await new Promise(resolve => setTimeout(resolve, 1000));
+  
+  const user = users.find(
+    u => u.email === credentials.email && u.password === credentials.password
+  );
+  
+  if (!user) {
+    throw new Error("Invalid email or password");
+  }
+  
+  // Don't return the password to the client
+  const { password, ...userWithoutPassword } = user;
+  return userWithoutPassword;
+};
 
-    if (user) {
-      set({
-        user: { ...user, password: '******' }, // Don't expose password
-        isAuthenticated: true,
-        error: null,
-      });
-      return true;
-    } else {
-      set({
-        user: null,
-        isAuthenticated: false,
-        error: 'Invalid email or password',
-      });
-      return false;
-    }
-  },
-  logout: () => {
-    set({ user: null, isAuthenticated: false, error: null });
-  },
-}));
+export const getCurrentUser = (): User | null => {
+  const userJson = localStorage.getItem('currentUser');
+  if (!userJson) return null;
+  
+  try {
+    return JSON.parse(userJson) as User;
+  } catch (e) {
+    return null;
+  }
+};
+
+export const setCurrentUser = (user: User | null): void => {
+  if (user) {
+    localStorage.setItem('currentUser', JSON.stringify(user));
+  } else {
+    localStorage.removeItem('currentUser');
+  }
+};
+
+export const logoutUser = (): void => {
+  localStorage.removeItem('currentUser');
+};
