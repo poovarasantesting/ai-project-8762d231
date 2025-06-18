@@ -1,28 +1,26 @@
-import React from 'react';
-import LoginForm from '@/components/LoginForm';
-import { useAuth } from '@/context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { isAuthenticated, isAdmin } from "@/lib/auth";
+import { LoginForm } from "@/components/LoginForm";
 
 export default function LoginPage() {
-  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
 
-  // Redirect if already logged in
-  if (isAuthenticated) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  useEffect(() => {
+    // Redirect if already logged in
+    if (isAuthenticated()) {
+      if (isAdmin()) {
+        navigate('/admin-dashboard');
+      } else {
+        navigate('/user-dashboard');
+      }
+    }
+  }, [navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-extrabold text-gray-900 mb-6">
-          Login System
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          Admin and User authentication demo with 3 test accounts
-        </p>
-      </div>
-
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+    <div className="min-h-screen flex flex-col justify-center items-center p-4 bg-muted/30">
+      <div className="w-full max-w-md">
+        <h1 className="text-4xl font-bold text-center mb-8">Welcome Back</h1>
         <LoginForm />
       </div>
     </div>

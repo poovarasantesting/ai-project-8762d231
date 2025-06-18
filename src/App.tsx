@@ -1,20 +1,36 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from '@/context/AuthContext';
-import LoginPage from '@/pages/LoginPage';
-import DashboardPage from '@/pages/DashboardPage';
-import { Toaster } from '@/components/ui/toaster';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Toaster } from "react-hot-toast";
+import HomePage from "@/pages/HomePage";
+import LoginPage from "@/pages/LoginPage";
+import AdminDashboardPage from "@/pages/AdminDashboardPage";
+import UserDashboardPage from "@/pages/UserDashboardPage";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-        </Routes>
-        <Toaster />
-      </AuthProvider>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route 
+          path="/admin-dashboard" 
+          element={
+            <ProtectedRoute requireAdmin={true}>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/user-dashboard" 
+          element={
+            <ProtectedRoute>
+              <UserDashboardPage />
+            </ProtectedRoute>
+          } 
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
     </BrowserRouter>
   );
 }

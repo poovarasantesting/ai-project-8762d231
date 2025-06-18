@@ -1,66 +1,57 @@
-import { LoginCredentials, User } from "@/types/auth";
+import { User } from "@/types/auth";
 
-// Mock database of users
-const users: (User & { password: string })[] = [
+// Demo users data
+export const users: User[] = [
   {
     id: "1",
+    name: "Admin User",
     email: "admin@example.com",
     password: "admin123",
-    name: "Admin User",
-    role: "admin"
+    role: "admin",
   },
   {
     id: "2",
-    email: "user1@example.com",
+    name: "Regular User",
+    email: "user@example.com",
     password: "user123",
-    name: "Regular User 1",
-    role: "user"
+    role: "user",
   },
   {
     id: "3",
-    email: "user2@example.com",
-    password: "user456",
-    name: "Regular User 2",
-    role: "user"
-  }
+    name: "John Doe",
+    email: "john@example.com",
+    password: "john123",
+    role: "user",
+  },
 ];
 
-export const loginUser = async (credentials: LoginCredentials): Promise<User> => {
-  // Simulate API delay
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  
-  const user = users.find(
-    u => u.email === credentials.email && u.password === credentials.password
-  );
-  
-  if (!user) {
-    throw new Error("Invalid email or password");
-  }
-  
-  // Don't return the password to the client
-  const { password, ...userWithoutPassword } = user;
-  return userWithoutPassword;
+// Auth helper functions
+export const authenticateUser = (email: string, password: string): User | null => {
+  const user = users.find(u => u.email === email && u.password === password);
+  return user || null;
 };
 
-export const getCurrentUser = (): User | null => {
+// Local storage management
+export const saveUserToLocalStorage = (user: User) => {
+  // Remove password before saving to localStorage for security
+  const { password, ...secureUser } = user;
+  localStorage.setItem('currentUser', JSON.stringify(secureUser));
+};
+
+export const getUserFromLocalStorage = (): Omit<User, 'password'> | null => {
   const userJson = localStorage.getItem('currentUser');
-  if (!userJson) return null;
-  
-  try {
-    return JSON.parse(userJson) as User;
-  } catch (e) {
-    return null;
-  }
+  return userJson ? JSON.parse(userJson) : null;
 };
 
-export const setCurrentUser = (user: User | null): void => {
-  if (user) {
-    localStorage.setItem('currentUser', JSON.stringify(user));
-  } else {
-    localStorage.removeItem('currentUser');
-  }
-};
-
-export const logoutUser = (): void => {
+export const clearUserFromLocalStorage = () => {
   localStorage.removeItem('currentUser');
+};
+
+export const isAuthenticated = (): boolean => {
+  return getUserFromLocalStorage() !== null;
+};
+
+export const isAdmin = (): boolean => {
+  const user = getUserFromLocalStorage();
+  return user?.role === 'admin';
 };
