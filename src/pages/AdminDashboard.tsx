@@ -1,122 +1,161 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuthStore } from '@/lib/auth';
-import { Button } from '@/components/ui/button';
-import { LogOut, Users, Settings, Activity } from 'lucide-react';
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { LogOut, ShieldAlert, Users } from "lucide-react";
 
 export default function AdminDashboard() {
-  const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
-
+  const { toast } = useToast();
+  const userEmail = localStorage.getItem("userEmail");
+  
   useEffect(() => {
-    if (!isAuthenticated || user?.role !== 'admin') {
-      navigate('/admin-login');
+    // Check if admin is logged in
+    const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    const userRole = localStorage.getItem("userRole");
+    
+    if (!isLoggedIn || userRole !== "admin") {
+      toast({
+        title: "Access denied",
+        description: "You need admin privileges to access this page",
+        variant: "destructive",
+      });
+      navigate("/login");
     }
-  }, [isAuthenticated, user, navigate]);
+  }, [navigate, toast]);
 
   const handleLogout = () => {
-    logout();
-    navigate('/admin-login');
+    localStorage.removeItem("isLoggedIn");
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("userEmail");
+    
+    toast({
+      title: "Logged out",
+      description: "Admin has been successfully logged out",
+    });
+    
+    navigate("/login");
   };
 
-  if (!isAuthenticated || !user || user.role !== 'admin') {
-    return null; // Don't render anything while redirecting
-  }
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-slate-900 text-white p-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <span>Welcome, {user.name}</span>
-            <Button variant="outline" size="sm" onClick={handleLogout} className="border-white text-white hover:bg-white hover:text-slate-900">
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </Button>
-          </div>
+    <div className="min-h-screen bg-gray-50 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl font-bold flex items-center">
+            <ShieldAlert className="h-6 w-6 mr-2 text-red-500" />
+            Admin Dashboard
+          </h1>
+          <Button variant="outline" onClick={handleLogout}>
+            <LogOut className="h-4 w-4 mr-2" />
+            Logout
+          </Button>
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white p-6 rounded-lg shadow-md flex items-center">
-            <div className="p-3 bg-blue-100 rounded-full mr-4">
-              <Users className="h-6 w-6 text-blue-500" />
-            </div>
-            <div>
-              <h3 className="text-lg font-medium">Total Users</h3>
-              <p className="text-2xl font-bold">3</p>
-            </div>
-          </div>
+        
+        <Card className="mb-6 border-red-200 bg-red-50">
+          <CardHeader>
+            <CardTitle className="text-red-700">
+              Administrator Access
+            </CardTitle>
+            <CardDescription>
+              Logged in as: {userEmail || "admin@example.com"} (Administrator)
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <p className="text-red-700">Welcome to the administrator dashboard. You have full system access.</p>
+          </CardContent>
+          <CardFooter className="border-t border-red-200 pt-6">
+            <p className="text-sm text-red-600">Access level: Administrator</p>
+          </CardFooter>
+        </Card>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Users</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">1,234</div>
+              <p className="text-sm text-gray-500">Total registered users</p>
+            </CardContent>
+          </Card>
           
-          <div className="bg-white p-6 rounded-lg shadow-md flex items-center">
-            <div className="p-3 bg-green-100 rounded-full mr-4">
-              <Activity className="h-6 w-6 text-green-500" />
-            </div>
-            <div>
-              <h3 className="text-lg font-medium">Active Sessions</h3>
-              <p className="text-2xl font-bold">1</p>
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">Active Today</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold">256</div>
+              <p className="text-sm text-gray-500">Users active in last 24h</p>
+            </CardContent>
+          </Card>
           
-          <div className="bg-white p-6 rounded-lg shadow-md flex items-center">
-            <div className="p-3 bg-purple-100 rounded-full mr-4">
-              <Settings className="h-6 w-6 text-purple-500" />
-            </div>
-            <div>
-              <h3 className="text-lg font-medium">System Status</h3>
-              <p className="text-sm font-medium px-2 py-1 bg-green-100 text-green-800 rounded-full inline-block">Online</p>
-            </div>
-          </div>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-xl">System Status</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center">
+                <div className="h-3 w-3 rounded-full bg-green-500 mr-2"></div>
+                <div className="text-xl font-medium">All Systems Normal</div>
+              </div>
+              <p className="text-sm text-gray-500">Last checked: {new Date().toLocaleTimeString()}</p>
+            </CardContent>
+          </Card>
         </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">User Management</h2>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">1</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Test User 1</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">user1@example.com</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">user</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">2</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Test User 2</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">user2@example.com</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">user</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                  </td>
-                </tr>
-                <tr>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">3</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Admin User</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">admin@example.com</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">admin</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Active</span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </main>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Users className="h-5 w-5 mr-2" />
+              User Management
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left py-2 px-2">Email</th>
+                    <th className="text-left py-2 px-2">Role</th>
+                    <th className="text-left py-2 px-2">Status</th>
+                    <th className="text-left py-2 px-2">Last Login</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b">
+                    <td className="py-2 px-2">admin@example.com</td>
+                    <td className="py-2 px-2"><span className="bg-red-100 text-red-700 text-xs px-2 py-1 rounded">Admin</span></td>
+                    <td className="py-2 px-2"><span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Active</span></td>
+                    <td className="py-2 px-2">Just now</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 px-2">user@example.com</td>
+                    <td className="py-2 px-2"><span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">User</span></td>
+                    <td className="py-2 px-2"><span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Active</span></td>
+                    <td className="py-2 px-2">Today, 10:24 AM</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 px-2">jane.doe@example.com</td>
+                    <td className="py-2 px-2"><span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">User</span></td>
+                    <td className="py-2 px-2"><span className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded">Active</span></td>
+                    <td className="py-2 px-2">Yesterday</td>
+                  </tr>
+                  <tr className="border-b">
+                    <td className="py-2 px-2">john.smith@example.com</td>
+                    <td className="py-2 px-2"><span className="bg-blue-100 text-blue-700 text-xs px-2 py-1 rounded">User</span></td>
+                    <td className="py-2 px-2"><span className="bg-yellow-100 text-yellow-700 text-xs px-2 py-1 rounded">Inactive</span></td>
+                    <td className="py-2 px-2">2 weeks ago</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+          <CardFooter className="border-t pt-4">
+            <Button variant="outline" className="ml-auto">View All Users</Button>
+          </CardFooter>
+        </Card>
+      </div>
     </div>
   );
 }
