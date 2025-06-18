@@ -1,15 +1,15 @@
+import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { Toaster } from "@/components/ui/toaster";
-import LoginPage from "./pages/LoginPage";
+import LandingPage from "./pages/LandingPage";
 
-export default function App() {
+function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/" element={<LandingPage />} />
       </Routes>
-      <Toaster />
     </BrowserRouter>
   );
 }
+
+export default App;
